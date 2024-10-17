@@ -2,7 +2,7 @@
     "name": "neuloa",
     "displayName": "Knitting helper",
     "description": "Groups selected pixels by colour, showing counter",
-    "version": "0.1",
+    "version": "1.0",
     "author": { "name": "Filipp Samoilov",
                 "email": "samoylovfp@email.com",
                 "url": "https://samoylovfp.dev/" },
