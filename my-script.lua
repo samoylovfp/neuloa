@@ -1,66 +1,77 @@
-
-local i = 3
-local neulo_dlg = Dialog("Knitting order")
+local neulo_dlg = nil
+local last_pos = nil
+local neulo_data = {}
 
 function show_neulo()
-  neulo_dlg:show { wait = false, autoscrollbars = true, }
+  neulo_dlg:show {
+    wait = false,
+    autoscrollbars = true,
+    bounds = rect
+  }
+  if last_pos ~= nil then
+    neulo_dlg.bounds = Rectangle{
+      x=last_pos.x,
+      y=last_pos.y,
+      width=neulo_dlg.bounds.width,
+      height=neulo_dlg.bounds.height
+    }
+    last_pos = nil
+  end
 end
 
-function init(plugin)
-  neulo_dlg
-    -- :button {
-    --   id ="refresh",
-    --   text="refresh",
-    --   onclick = function()
-    --     local id = "c" .. i
-    --     local ii = i
-    --     neulo_dlg:shades{
-    --       id=id,
-    --       label="[ ] " .. ii,
-    --       mode="sort",
-    --       colors={Color{r=100,g=i*4,b=0}},
-    --       onclick=function()
-            
-    --         neulo_dlg:modify{
-    --           id=id,
-    --           label="[X] " .. ii
-    --         }
-    --       end
-    --     }
-    --     -- to refresh the dialog
-    --     neulo_dlg:modify{title="Neulo"}
-    --     i = i + 1
-    --   end
-    -- }
+function dlg_base(dir)
+  if neulo_dlg ~= nil then
+    last_pos = neulo_dlg.bounds
+    neulo_dlg:close()
+  end
+  
+  neulo_dlg = Dialog("Knitting order")
     :button {
       id = "left",
-      text = "<-",
+      text = " <- ",
       onclick = function()
-        neulo_dlg:modify {
-          id = "left",
-          text = "[<-]"
-        }
-        neulo_dlg:modify {
-          id = "right",
-          text = "->"
-        }
+        calculate_order("left")
       end
     }
     :button {
       id = "right",
-      text = "[->]",
+      text = " -> ",
       onclick = function()
-        neulo_dlg:modify {
-          id = "left",
-          text = "<-"
-        }
-        neulo_dlg:modify {
-          id = "right",
-          text = "[->]"
-        }
+        calculate_order("right")
       end
     }
-    
+  return neulo_dlg
+end
+
+function calculate_order(dir)
+  dlg = dlg_base(dir)
+  -- first check if only one row is selected
+  if app.sprite.selection.bounds.height ~= 1 then
+    dlg:label{text="Select a single row"}
+  else
+    local b = app.sprite.selection.bounds
+    local ranges = {
+      left = {b.x+b.width, b.x, -1},
+      right = {b.x, b.x+b.width, 1}
+    }
+    local range = ranges[dir]
+    local first, last, offset = table.unpack(range)
+    print(first, last, offset)
+    local last_color = nil
+    local pix_count = 0
+
+    for x=first,last,offset do
+      dlg:shades{
+        label=x
+      }
+    end
+  end
+  
+  show_neulo()
+end
+
+function init(plugin)
+  dlg_base()
   show_neulo()
 
   plugin:newCommand {
@@ -68,6 +79,7 @@ function init(plugin)
     title = "Show knitting order",
     group = "select_simple",
     onclick = function()
+      dlg_base()
       show_neulo()
     end
   }
