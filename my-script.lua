@@ -49,7 +49,6 @@ function dlg_base(dir)
 end
 
 function add_color(col, i, count)
-  print("adding "..i)
   neulo_dlg:shades {
     id = "col"..i,
     label="    "..count,
