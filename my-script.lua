@@ -24,18 +24,22 @@ function dlg_base(dir)
     last_pos = neulo_dlg.bounds
     neulo_dlg:close()
   end
+  local left = dir == "left"
+  local right = dir == "right"
   
   neulo_dlg = Dialog("Knitting order")
     :button {
       id = "left",
-      text = " <- ",
+      text = left and "[<-]" or " <- ",
+      focus = left,
       onclick = function()
         calculate_order("left")
       end
     }
     :button {
       id = "right",
-      text = " -> ",
+      text = right and"[->]" or " -> ",
+      focus = right,
       onclick = function()
         calculate_order("right")
       end
@@ -45,24 +49,47 @@ end
 
 function calculate_order(dir)
   dlg = dlg_base(dir)
+  local sel = app.sprite.selection
   -- first check if only one row is selected
-  if app.sprite.selection.bounds.height ~= 1 then
+  if sel.bounds.height ~= 1 then
     dlg:label{text="Select a single row"}
   else
-    local b = app.sprite.selection.bounds
+    local b = sel.bounds
     local ranges = {
-      left = {b.x+b.width, b.x, -1},
-      right = {b.x, b.x+b.width, 1}
+      left  = {b.x + b.width - 1, b.x,               -1},
+      right = {b.x,               b.x + b.width - 1, 1}
     }
     local range = ranges[dir]
     local first, last, offset = table.unpack(range)
-    print(first, last, offset)
+
     local last_color = nil
     local pix_count = 0
 
-    for x=first,last,offset do
+    for x=first, last, offset do
+      local col = app.image:getPixel(
+        x - app.cel.position.x,
+        b.y - app.cel.position.y
+      )
+
+      if last_color ~= col then
+        if pix_count > 0 then
+          -- print(x .." adding old color " .. last_color)
+          dlg:shades {
+            label=pix_count, colors = {last_color}
+          }
+        end
+        last_color = col
+        pix_count = 1
+      else
+        -- print(x .. " continuing color " .. col)
+        pix_count = pix_count + 1
+      end
+    end
+
+    if pix_count > 0 then
+      -- print("all passed, adding last color")
       dlg:shades{
-        label=x
+        label=pix_count, colors = {last_color}
       }
     end
   end
