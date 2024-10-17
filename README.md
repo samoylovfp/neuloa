@@ -2,6 +2,9 @@
 
 Counts contiguous runs of pixels
 
+<img width="686" alt="image_2024-10-17_17-30-53" src="https://github.com/user-attachments/assets/a863ccd5-640f-4eb2-9fcb-7f9cbbbf963d">
+
+
 ## Installation
 
 1. Download the `neuloa.aseprite-extension` from the [latest](https://github.com/samoylovfp/neuloa/releases/latest) release
