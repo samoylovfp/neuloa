@@ -2,7 +2,12 @@
 
 Counts contiguous runs of pixels
 
-<img width="686" alt="image_2024-10-17_17-30-53" src="https://github.com/user-attachments/assets/a863ccd5-640f-4eb2-9fcb-7f9cbbbf963d">
+<img width="600" src="https://github.com/user-attachments/assets/725754d0-42c9-43dd-a748-a888c1b48263">
+
+Can also count total yarn needed for a patch
+
+<img width="600" src ="https://github.com/user-attachments/assets/bd2460fd-e58f-41f8-8d2d-0bddb036ca73">
+
 
 
 ## Installation
