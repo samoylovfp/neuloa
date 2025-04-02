@@ -1,6 +1,8 @@
 local neulo_dlg = nil
 local last_pos = nil
 local neulo_data = {}
+local is_total = 0
+local g_per_stitch = 0.1
 
 function show_neulo()
   neulo_dlg:show {
@@ -27,9 +29,43 @@ function dlg_base(dir)
   neulo_data = {rows={}}
   local left = dir == "left"
   local right = dir == "right"
-  
-  neulo_dlg = Dialog("Knitting order")
-    :button {
+
+  neulo_dlg = Dialog("Neuloa")
+  neulo_dlg
+    :button{
+      id = "total",
+      text = "total",
+      onclick = function()
+        is_total = 1
+        dlg_base()
+        show_neulo()
+      end
+    }
+    :button{
+      id = "order",
+      text = "order",
+      onclick = function()
+        is_total = 0
+        dlg_base()
+        show_neulo()
+      end
+    }
+    :separator{id="sep"}
+  if (is_total == 1) then
+    neulo_dlg
+      :entry{id = "g_per_stitch", label="g per stitch", text=tostring(g_per_stitch)}
+      :button{
+        id = "count",
+        text = "count",
+        onclick = function() 
+          g_per_stitch = neulo_dlg.data.g_per_stitch
+          dlg_base()
+          show_neulo()
+        end
+      }
+    calc_colors()
+  else
+    neulo_dlg:button {
       id = "left",
       text = left and "[<-]" or " <- ",
       focus = left,
@@ -45,6 +81,7 @@ function dlg_base(dir)
         calculate_order("right")
       end
     }
+  end
   return neulo_dlg
 end
 
@@ -144,4 +181,29 @@ end
 
 function exit(plugin)
   neulo_dlg:close()
+end
+
+function calc_colors()
+  local sel = app.sprite.selection
+  local b = sel.bounds
+  local colours = {}
+  for i=0, b.width-1, 1 do
+    for j=0, b.height-1, 1 do
+      local col = app.image:getPixel(
+        b.x - app.cel.position.x + i,
+        b.y - app.cel.position.y + j
+      )
+      if colours[col] == nil then
+        colours[col] = 0
+      end
+      colours[col] = colours[col] + 1
+    end
+  end
+  for k,v in pairs(colours) do
+    neulo_dlg:shades {
+      id = "col"..k,
+      label= (g_per_stitch * v) .. " g ("..v..")",
+      colors = {k},
+    }
+  end
 end
